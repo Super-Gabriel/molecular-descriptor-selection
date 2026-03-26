@@ -30,7 +30,13 @@ class ModelTrainer:
         joblib.dump(self.model, path)
 
     def save_limits_PSO(self, path:str):
-        limits = [(self.X[:,i].min(), self.X[:,i].max()) for i in range(self.X.shape[1])]
+        #limits = [(self.X[:,i].min(), self.X[:,i].max()) for i in range(self.X.shape[1])]
+        
+        lower = np.percentile(self.X, 1, axis=0)
+        upper = np.percentile(self.X, 99, axis=0)
+        
+        limits = [(lower[i], upper[i]) for i in range(self.X.shape[1])]
+
         joblib.dump(limits, path)
 
     def evaluate_model(self):
