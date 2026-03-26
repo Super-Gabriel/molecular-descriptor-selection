@@ -1,6 +1,8 @@
 import pandas as pd
 from .descriptors_generator import generate_descriptors
+from .model_trainer import ModelTrainer
 from .mRMR import mRMR_feature_selection
+
 
 class Driver:
     def __init__(self, args:tuple):
@@ -13,13 +15,21 @@ class Driver:
             self.smiles_column
         ) = args
 
-        
-
-
     def run(self):
         raw_df = pd.read_csv(self.raw_dataset_path)
         descriptors_df = self.generate_descriptors_dataset(raw_df)
         reduced_descriptors_df = self.reduce_descriptors_dataset(descriptors_df)
+
+        X = reduced_descriptors_df.drop(columns=[self.target_column]).values
+        y = reduced_descriptors_df[self.target_column].values
+
+        model_trainer = ModelTrainer(X, y)
+        model_trainer.train_test_split()
+        model_trainer.train_random_forest()
+        model_trainer.evaluate_model()
+
+        model_trainer.save_model(self.project_path + "/models/random_forest.pkl")
+        model_trainer.save_limits_PSO(self.project_path + "/models/limits_PSO.pkl")
 
     def reduce_descriptors_dataset(self, descriptors_df:pd.DataFrame):
         print("\n\tReduciendo descriptores con mRMR...")
