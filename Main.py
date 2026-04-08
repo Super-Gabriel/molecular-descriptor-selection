@@ -21,5 +21,5 @@ if __name__ == "__main__":
     project_path = os.getcwd()
     args = build_args(project_path)
     driver = Driver(args)
-    driver.run()
+    driver.run(normalize_features=False)
     

@@ -15,7 +15,7 @@ class Driver:
             self.smiles_column
         ) = args
 
-    def run(self):
+    def run(self, normalize_features:bool=True):
         raw_df = pd.read_csv(self.raw_dataset_path)
         descriptors_df = self.generate_descriptors_dataset(raw_df)
         reduced_descriptors_df = self.reduce_descriptors_dataset(descriptors_df)
@@ -25,11 +25,17 @@ class Driver:
 
         model_trainer = ModelTrainer(X, y)
         model_trainer.train_test_split()
+        if normalize_features:
+            model_trainer.normalize_features()
         model_trainer.train_random_forest()
         model_trainer.evaluate_model()
 
         model_trainer.save_model(self.project_path + "/models/random_forest.pkl")
-        model_trainer.save_limits_PSO(self.project_path + "/models/limits_PSO.pkl")
+        if normalize_features:
+            model_trainer.save_limits_PSO_normalized(self.project_path + "/models/limits_PSO.pkl")
+            model_trainer.save_scaler(self.project_path + "/models/scaler.pkl")
+        else:
+            model_trainer.save_limits_PSO(self.project_path + "/models/limits_PSO.pkl")
 
     def reduce_descriptors_dataset(self, descriptors_df:pd.DataFrame):
         print("\n\tReduciendo descriptores con mRMR...")
@@ -45,6 +51,7 @@ class Driver:
         descriptors = pd.DataFrame(descriptors.tolist(), index=raw_df.index)
         descriptors = descriptors.dropna(axis=0, how='all') # eliminando fila de moleculas con fallo de TODOS los descriptores
         descriptors = descriptors.dropna(axis=1, how='any') # eliminando columnas de descriptores que generaron algun NaN
+        descriptors = descriptors.drop(columns=['Ipc'])
         descriptors = pd.concat([raw_df[[self.target_column]], descriptors], axis=1, join='inner') # 'inner' para conservar solamente las filas/moléculas que sobrevivieron
         descriptors.to_csv(self.descriptors_dataset_path, index=False)
 
