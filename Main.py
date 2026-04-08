@@ -7,13 +7,15 @@ def build_args(project_path:str):
 
     target_column = "pIC50"
     smiles_column = "SMILES"
+    excluded_descriptors = ['Ipc']
     return(
         project_path,
         raw_dataset_path,
         descriptors_dataset_path,
         reduced_descriptors_dataset_path,
         target_column,
-        smiles_column
+        smiles_column,
+        excluded_descriptors
     )
 
 if __name__ == "__main__":
@@ -21,5 +23,5 @@ if __name__ == "__main__":
     project_path = os.getcwd()
     args = build_args(project_path)
     driver = Driver(args)
-    driver.run(normalize_features=False)
+    driver.run(normalize_features=True)
     
