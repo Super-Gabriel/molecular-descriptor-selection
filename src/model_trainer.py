@@ -39,20 +39,22 @@ class ModelTrainer:
         joblib.dump(self.model, path)
 
     def save_limits_PSO(self, path:str):
-        #limits = [(self.X[:,i].min(), self.X[:,i].max()) for i in range(self.X.shape[1])]
+        # Obtenemos los límites utilizando X_train para evitar fuga de información
+        lower = np.percentile(self.X_train, 1, axis=0)
+        upper = np.percentile(self.X_train, 99, axis=0)
         
-        lower = np.percentile(self.X, 1, axis=0)
-        upper = np.percentile(self.X, 99, axis=0)
-        
-        limits = [(lower[i], upper[i]) for i in range(self.X.shape[1])]
+        limits = [(lower[i], upper[i]) for i in range(self.X_train.shape[1])]
 
         joblib.dump(limits, path)
 
     def save_limits_PSO_normalized(self, path:str):
-        # Límites en el espacio normalizado: todas las dimensiones entre 0 y 1
-        limits = [(0.0, 1.0) for _ in range(self.X_train.shape[1])]
+        # Aplicamos la misma lógica del percentil 1 y 99 pero en el espacio normalizado usando X_train
+        lower = np.percentile(self.X_train, 1, axis=0)
+        upper = np.percentile(self.X_train, 99, axis=0)
+        
+        limits = [(lower[i], upper[i]) for i in range(self.X_train.shape[1])]
         joblib.dump(limits, path)
-        print(f"\n\tLímites para PSO guardados en {path} (rango [0,1])")
+        print(f"\n\tLímites para PSO guardados en {path}")
 
     def save_scaler(self, path: str):
         joblib.dump(self.scaler, path)
