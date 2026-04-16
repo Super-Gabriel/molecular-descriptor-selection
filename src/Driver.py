@@ -52,7 +52,7 @@ class Driver:
         descriptors = pd.DataFrame(descriptors.tolist(), index=raw_df.index)
         descriptors = descriptors.dropna(axis=0, how='all') # eliminando fila de moleculas con fallo de TODOS los descriptores
         descriptors = descriptors.dropna(axis=1, how='any') # eliminando columnas de descriptores que generaron algun NaN
-        descriptors = descriptors.drop(columns=self.excluded_descriptors)
+        descriptors = descriptors.drop(columns=self.excluded_descriptors, errors='ignore')
         descriptors = pd.concat([raw_df[[self.target_column]], descriptors], axis=1, join='inner') # 'inner' para conservar solamente las filas/moléculas que sobrevivieron
         descriptors.to_csv(self.descriptors_dataset_path, index=False)
 
