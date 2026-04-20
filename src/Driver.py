@@ -2,6 +2,7 @@ import pandas as pd
 from .descriptors_generator import generate_descriptors
 from .model_trainer import ModelTrainer
 from .mRMR import mRMR_feature_selection
+import numpy as np
 
 
 class Driver:
@@ -16,6 +17,30 @@ class Driver:
             self.excluded_descriptors
         ) = args
 
+    def menu(self):
+        while True:
+            print("\nSeleccione una opción:")
+            print("1. Generar descriptores")
+            print("2. Reducir descriptores")
+            print("3. Entrenar modelo")
+            print("4. Salir")
+            option = input("Opción: ")
+            if option == "1":
+                df = pd.read_csv(self.raw_dataset_path)
+                self.generate_descriptors_dataset(df)
+            elif option == "2":
+                df = pd.read_csv(self.descriptors_dataset_path)
+                self.reduce_descriptors_dataset(df)
+            elif option == "3":
+                df = pd.read_csv(self.reduced_descriptors_dataset_path)
+                X = df.drop(columns=[self.target_column]).values
+                y = df[self.target_column].values
+                self.train_random_forest(X, y)
+            elif option == "4":
+                exit()
+            else:
+                print("Opción inválida")
+
     def run(self, normalize_features:bool=True):
         raw_df = pd.read_csv(self.raw_dataset_path)
         descriptors_df = self.generate_descriptors_dataset(raw_df)
@@ -24,6 +49,10 @@ class Driver:
         X = reduced_descriptors_df.drop(columns=[self.target_column]).values
         y = reduced_descriptors_df[self.target_column].values
 
+        self.train_random_forest(X, y, normalize_features)
+
+
+    def train_random_forest(self, X:np.ndarray, y:np.ndarray, normalize_features:bool=True):
         model_trainer = ModelTrainer(X, y)
         model_trainer.train_test_split()
         if normalize_features:
@@ -38,6 +67,7 @@ class Driver:
         else:
             model_trainer.save_limits_PSO(self.project_path + "/models/limits_PSO.pkl")
 
+
     def reduce_descriptors_dataset(self, descriptors_df:pd.DataFrame):
         print("\n\tReduciendo descriptores con mRMR...")
         reduced_descriptors = mRMR_feature_selection(descriptors_df, self.target_column) # aplicando mRMR
@@ -45,6 +75,7 @@ class Driver:
         reduced_descriptors_df.to_csv(self.reduced_descriptors_dataset_path, index=False)
 
         return reduced_descriptors_df
+
 
     def generate_descriptors_dataset(self, raw_df:pd.DataFrame):
         print("\n\tGenerando descriptores...")

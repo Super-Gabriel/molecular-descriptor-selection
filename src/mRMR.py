@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.feature_selection import mutual_info_regression
 from sklearn.preprocessing import KBinsDiscretizer
-from sklearn.metrics import mutual_info_score
+from sklearn.metrics import mutual_info_score  # Importado para el metodo nuevo
 
 def mRMR_feature_selection(df:pd.DataFrame, target_column:str, n_features_to_select:int=10, n_bins:int=5, random_state:int=42):
     if target_column not in df.columns:
@@ -26,8 +26,12 @@ def mRMR_feature_selection(df:pd.DataFrame, target_column:str, n_features_to_sel
         X_disc = discretizer.fit_transform(X.values)
 
     # Relevancia (MI con el objetivo)
-    # Importante: Como X_disc está discretizado, debemos pasar discrete_features=True
+    # --- METODO ANTERIOR ---
+    #mi_target = mutual_info_regression(X_disc, y, random_state=random_state)
+    
+    # --- METODO NUEVO ---
     mi_target = mutual_info_regression(X_disc, y, discrete_features=True, random_state=random_state)
+
     mi_series = pd.Series(mi_target, index=feature_names)
 
     selected = []
@@ -48,8 +52,14 @@ def mRMR_feature_selection(df:pd.DataFrame, target_column:str, n_features_to_sel
                 idx_feat = feature_names.index(feat)
                 for sel_feat in selected:
                     idx_sel = feature_names.index(sel_feat)
-                    # Usamos mutual_info_score porque ambas variables son discretas (categóricas)
+                    # --- METODO ANTERIOR ---
+                    #mi_redundancy = mutual_info_regression(
+                    #   X_disc[:, [idx_feat]], X_disc[:, idx_sel], random_state=random_state
+                    #)[0]
+                    
+                    # --- METODO NUEVO ---
                     mi_redundancy = mutual_info_score(X_disc[:, idx_feat], X_disc[:, idx_sel])
+
                     redundancy_vals.append(mi_redundancy)
                 
                 redundancy = np.mean(redundancy_vals)
