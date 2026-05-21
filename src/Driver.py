@@ -30,7 +30,7 @@ class Driver:
                 self.generate_descriptors_dataset(df)
             elif option == "2":
                 df = pd.read_csv(self.descriptors_dataset_path)
-                self.reduce_descriptors_dataset(df)
+                self.reduce_descriptors_dataset(df, mrmr="fast_mrmr")
             elif option == "3":
                 df = pd.read_csv(self.reduced_descriptors_dataset_path)
                 X = df.drop(columns=[self.target_column]).values
@@ -68,11 +68,26 @@ class Driver:
             model_trainer.save_limits_PSO(self.project_path + "/models/limits_PSO.pkl")
 
 
-    def reduce_descriptors_dataset(self, descriptors_df:pd.DataFrame):
-        print("\n\tReduciendo descriptores con mRMR...")
-        reduced_descriptors = mRMR_feature_selection(descriptors_df, self.target_column) # aplicando mRMR
-        reduced_descriptors_df = descriptors_df[[self.target_column] + reduced_descriptors]
-        reduced_descriptors_df.to_csv(self.reduced_descriptors_dataset_path, index=False)
+    def reduce_descriptors_dataset(self, descriptors_df:pd.DataFrame, mrmr="mrmr"):
+        if mrmr == "mrmr":
+            print("\n\tReduciendo descriptores con mRMR...")
+            reduced_descriptors = mRMR_feature_selection(descriptors_df, self.target_column) # aplicando mRMR
+            reduced_descriptors_df = descriptors_df[[self.target_column] + reduced_descriptors]
+            reduced_descriptors_df.to_csv(self.reduced_descriptors_dataset_path, index=False)
+        
+        elif mrmr == "fast_mrmr":
+            print("\n\tReduciendo descriptores con fast_mRMR...")
+            from .fast_mRMR import fast_mrmr
+            from sklearn.preprocessing import KBinsDiscretizer
+            X = descriptors_df.drop(columns=[self.target_column])
+            y = descriptors_df[self.target_column].values
+
+            discretizer = KBinsDiscretizer(n_bins=5, encode="ordinal", strategy="quantile")
+            X_disc = discretizer.fit_transform(X)
+            X_disc_df = pd.DataFrame(X_disc, columns=X.columns)
+            reduced_descriptors = fast_mrmr(X_disc_df, y, 10)
+            reduced_descriptors_df = descriptors_df[[self.target_column] + reduced_descriptors]
+            reduced_descriptors_df.to_csv(self.reduced_descriptors_dataset_path, index=False)
 
         return reduced_descriptors_df
 

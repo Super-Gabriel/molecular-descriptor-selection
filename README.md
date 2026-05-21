@@ -78,3 +78,26 @@ Pipeline para calcular descriptores, reducirlos y entrenar un modelo de Random F
 
 ---
 
+## cambio a fast-mRMR 
+
+---
+
+### descriptores seleccionados por fast-mRMR:
+
+- [x] MaxAbsEStateIndex
+- [x] fr_NH1
+- [x] PEOE_VSA6
+- [x] SlogP_VSA10
+- [x] BalabanJ
+- [x] MinPartialCharge
+- [x] fr_para_hydroxylation
+- [x] BCUT2D_MWLOW
+- [ ] SlogP_VSA8
+- [ ] qed
+
+**Scores:**
+- R2 entrenamiento: 0.9448617587104494
+- R2 prueba: 0.690807826311094
+- RMSE prueba: 0.6740699976553848
+
+

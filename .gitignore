@@ -2,3 +2,5 @@ __pycache__
 env
 datasets/*.csv
 models/*.pkl
+bib.txt
+todo.txt
